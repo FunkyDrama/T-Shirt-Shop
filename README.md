@@ -183,5 +183,5 @@ MIT.
 ---
 
 ## 🙋 Support
-This is a test project shop for YOND, so support inquiries are not available. Feel free to use and modify the code as needed!
+This is a test project shop, so support inquiries are not available. Feel free to use and modify the code as needed!
 
