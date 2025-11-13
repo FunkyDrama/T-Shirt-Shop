@@ -91,3 +91,53 @@ async def add_product(
     :rtype: ProductOut
     """
     return await svc.add_product(product)
+
+
+@router.patch("/{product_id}", status_code=200)
+async def update_product(
+    product_id: int,
+    new_data: ProductIn,
+    svc: Annotated[ProductService, Depends(get_product_service)],
+):
+    """
+    Updates a product by its unique identifier.
+
+    This function is part of a FastAPI application and is used to update
+    product details from the service layer. It utilizes dependency injection
+    to access the product service.
+
+    :param new_data:
+    :param product_id: The unique identifier of the product.
+    :type product_id: int
+    :param svc: The instance of ProductService injected via dependency
+        resolution.
+    :type svc: ProductService
+    :return: The product details as a response model conforming to
+        ``ProductOut``.
+    :rtype: ProductOut
+    """
+    return await svc.update_product(product_id, new_data)
+
+
+@router.delete("/{product_id}", status_code=204)
+async def delete_product(
+    product_id: int,
+    svc: Annotated[ProductService, Depends(get_product_service)],
+):
+    """
+    Deletes a product by its unique identifier.
+
+    This function is part of a FastAPI application and is used to delete
+    product details from the service layer. It utilizes dependency injection
+    to access the product service.
+
+    :param product_id: The unique identifier of the product.
+    :type product_id: int
+    :param svc: The instance of ProductService injected via dependency
+        resolution.
+    :type svc: ProductService
+    :return: The product details as a response model conforming to
+        ``ProductOut``.
+    :rtype: ProductOut
+    """
+    return await svc.delete_product(product_id)

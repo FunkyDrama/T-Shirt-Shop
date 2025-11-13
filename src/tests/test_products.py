@@ -92,3 +92,35 @@ async def test_get_products(app: FastAPI, client: AsyncClient):
     assert "total" in listing and isinstance(listing["total"], int)
     assert any(p["id"] == created["id"] for p in listing["products"])
     assert listing["total"] == len(listing["products"])
+
+
+@pytest.mark.asyncio
+async def test_update_products(app: FastAPI, client: AsyncClient):
+    payload = make_product_payload(name="Second Product", price="5.00", quantity=5)
+    create = await client.post(f"{API_PREFIX}/products", json=payload)
+    assert create.status_code == 201
+    created = create.json()
+    resp = await client.get(f"{API_PREFIX}/products/{created['id']}")
+    assert resp.status_code == 200
+    new_payload = make_product_payload(name="Updated Product", price="10.00", quantity=10)
+    update = await client.patch(f"{API_PREFIX}/products/{created['id']}", json=new_payload)
+    assert update.status_code == 200
+    new_resp = await client.get(f"{API_PREFIX}/products/{created['id']}")
+    assert new_resp.status_code == 200
+    updated_product = new_resp.json()
+    assert updated_product['name'] == new_payload['name']
+    assert updated_product['price'] == new_payload['price']
+    assert updated_product['quantity'] == new_payload['quantity']
+
+
+@pytest.mark.asyncio
+async def test_delete_products(app: FastAPI, client: AsyncClient):
+    payload = make_product_payload(name="Second Product", price="5.00", quantity=5)
+    create = await client.post(f"{API_PREFIX}/products", json=payload)
+    assert create.status_code == 201
+    created = create.json()
+    delete = await client.delete(f"{API_PREFIX}/products/{created['id']}")
+    assert delete.status_code == 204
+    read = await client.get(f"{API_PREFIX}/products/{created['id']}")
+    assert read.status_code == 404
+

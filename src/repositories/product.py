@@ -1,4 +1,7 @@
+import logging
 from collections.abc import Sequence
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,3 +40,22 @@ class ProductRepository:
         await self.session.commit()
         await self.session.refresh(product)
         return product
+
+    async def update_product(
+        self,
+        product: Product,
+        new_product_data: ProductIn,
+    ) -> Product:
+        for key, value in new_product_data.model_dump().items():
+            setattr(product, key, value)
+        await self.session.commit()
+        await self.session.refresh(product)
+        return product
+
+    async def delete_product(self, product_id: int) -> None:
+        stmt = await self.session.execute(
+            select(Product).where(Product.id == product_id),
+        )
+        product = stmt.scalar_one_or_none()
+        await self.session.delete(product)
+        await self.session.commit()

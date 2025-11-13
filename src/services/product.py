@@ -77,3 +77,29 @@ class ProductService:
                 f"product:{result.id}", result.model_dump_json(), ex=self.cache_ttl
             )
             return result
+
+
+    async def update_product(self, product_id: int, new_data: ProductIn) -> ProductOut:
+        async with self.session as session:
+            repo = ProductRepository(session)
+            product = await repo.get_product_by_id(product_id)
+            if not product:
+                raise HTTPException(status_code=404, detail="Product not found")
+
+            await self.redis.delete("products:all")
+
+            updated_product = await repo.update_product(product, new_data)
+            result = ProductOut.model_validate(updated_product)
+            await self.redis.set(f"product:{product_id}", result.model_dump_json(), ex=self.cache_ttl)
+            return result
+
+    async def delete_product(self, product_id: int) -> None:
+        async with self.session as session:
+            repo = ProductRepository(session)
+            product = await repo.get_product_by_id(product_id)
+            if not product:
+                raise HTTPException(status_code=404, detail="Product not found")
+
+            await repo.delete_product(product_id)
+            await self.redis.delete("products:all")
+            await self.redis.delete(f"product:{product_id}")
